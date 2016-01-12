@@ -1,0 +1,2 @@
+cmdhistory=["Integer" "Aze" "\=> (foo \\"Hey\\")" "(foo A)" "\=> (foo a)" "(foo \\"Aze\\")" "foo locking" "(foo ok)" "(foo \\"ok\\")" "(str \\"Hello\\")" "(+ 1 1)" "(\= 1 1)" "(\= 1 2)" "(/ 5 2)" "(/ 6 2)" "(\= 1 1)" "(\=\= 1 1)" "(\=\= 2 3)" "(\= 1 1.0)" "(\=\= 1 1.0)" "(if 1 \= 1 print \\"Ok\\" print \\"No\\")" "(if 1 \= 1 (print \\"Ok\\") (print \\"No\\"))" "(if false \:t \:f)" "(if true \:t \:f)" "(if nil \:t \:f)" "(if (Boolean. false) \:t \:f)" "(if (\= 1 1.0) \:t \:f)" "(Boolean false)" "(Boolean. false)" "(Boolean. true)"]
+eclipse.preferences.version=1
