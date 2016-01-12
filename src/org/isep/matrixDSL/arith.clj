@@ -2,7 +2,12 @@
   (:require [instaparse.core :as insta])
   (:import (clojure.asm         Opcodes Type ClassWriter)
            (clojure.asm.commons Method GeneratorAdapter)))
- 
+
+
+(import org.isep.matrixDSL.java.PersistentVectorCompiler)
+(PersistentVectorCompiler.)
+(PersistentVectorCompiler/hello 1)
+
 (def arith
   "grammar parsing our language. A programe is a sequence of instructions separated by a semi-colon.
   It takes arguments %1 ..%n.
@@ -55,12 +60,6 @@
 (arith "a=%2*3;b=a+2*4+%1;b+2")
 
 (interpret (arith "a=%2*3;b=a+2*4+%1;b+2") 1 3)
-
-(import org.isep.compilation.Hello)
-(Hello.)
-(Hello/hello 1)
-(Hello/hey 1)
-
 
 (defn varnames-to-indices [ast]
   "Builds a mapping of variables and argument names to local indices.
