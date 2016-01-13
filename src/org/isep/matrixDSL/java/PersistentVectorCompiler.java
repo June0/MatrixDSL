@@ -60,10 +60,10 @@ public class PersistentVectorCompiler {
 			addSubPersistentVector(persistentVector.get(0).toString(), 
 					newPersistentVector1, 
 					newPersistentVector2);
-			if(persistentVector.get(0).toString().equals(":add")) {
+			if(addsub.equals(":add")) {
 				System.out.print("+"+ vector3.getArgument());
 			}
-			else if (persistentVector.get(0).toString().equals(":sub")) {
+			else if (addsub.equals(":sub")) {
 				System.out.print("-"+ vector3.getArgument());
 			}
 			
