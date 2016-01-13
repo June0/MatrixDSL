@@ -1,4 +1,4 @@
-(ns sandbox.instaparse
+(ns org.isep.matrixDSL.instaparse
   (:require [instaparse.core :as insta]))
 
 (def as-and-bs
