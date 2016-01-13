@@ -6,7 +6,7 @@
 
 (import org.isep.matrixDSL.java.PersistentVectorCompiler)
 (PersistentVectorCompiler.)
-(PersistentVectorCompiler/hello 1)
+(PersistentVectorCompiler/test 1)
 (PersistentVectorCompiler/test nil)
 
 (def arith
