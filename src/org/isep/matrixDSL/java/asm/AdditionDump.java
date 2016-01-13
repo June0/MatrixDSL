@@ -1,4 +1,4 @@
-package org.isep.matrixDSL.asm;
+package org.isep.matrixDSL.java.asm;
 import java.util.*;
 import org.objectweb.asm.*;
 

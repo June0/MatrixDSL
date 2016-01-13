@@ -1,4 +1,4 @@
-package org.isep.matrixDSL.asm;
+package org.isep.matrixDSL.java.asm;
 
 public class Addition {
 	

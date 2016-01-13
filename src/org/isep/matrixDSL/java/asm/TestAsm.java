@@ -1,4 +1,4 @@
-package org.isep.matrixDSL.asm;
+package org.isep.matrixDSL.java.asm;
 import java.io.File;
 import java.io.FileWriter;
 
@@ -8,7 +8,7 @@ public class TestAsm {
 
 	public static void main(String[] args) {
 //		 String[] tab =
-//		 {"bin/org/isep/matrixDSL/asm/Addition.class"};
+//		 {"bin/org/isep/matrixDSL/java/asm/Addition.class"};
 //		 try {
 //		 ASMifier.main(tab);
 //		 } catch (Exception e) {
