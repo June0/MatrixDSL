@@ -1,12 +1,11 @@
 package org.isep.matrixDSL.java;
 
-import java.util.ArrayList;
-
 import org.isep.matrixDSL.java.domain.Vector;
+import org.objectweb.asm.*;
 
 import clojure.lang.PersistentVector;
 
-public class PersistentVectorCompiler {
+public class PersistentVectorCompiler implements Opcodes{
 	public static String test(PersistentVector vector) {
 		String operation;
 		
@@ -21,6 +20,17 @@ public class PersistentVectorCompiler {
 		PersistentVector addsub = (PersistentVector) vector.get(1);
 		//System.out.println(addsub);
 		//System.out.println(addsub.get(0).toString());
+		
+		ClassWriter cw = new ClassWriter(0);
+		FieldVisitor fv;
+		MethodVisitor mv;
+		AnnotationVisitor av0;
+
+		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, "Addition", null, "java/lang/Object", null);
+
+		
+		
+		
 		addSubPersistentVector((String) addsub.get(0).toString(), (PersistentVector) addsub.get(1), (PersistentVector) addsub.get(2));
 
 		
