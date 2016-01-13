@@ -7,6 +7,7 @@
 (import org.isep.matrixDSL.java.PersistentVectorCompiler)
 (PersistentVectorCompiler.)
 (PersistentVectorCompiler/hello 1)
+(PersistentVectorCompiler/test nil)
 
 (def arith
   "grammar parsing our language. A programe is a sequence of instructions separated by a semi-colon.
