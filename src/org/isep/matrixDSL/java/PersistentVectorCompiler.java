@@ -33,16 +33,15 @@ public class PersistentVectorCompiler extends ClassLoader implements Opcodes{
 	public static Class compileExpression(PersistentVector vector, String className) {
 		ClassWriter cw = new ClassWriter(0);
 		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
-		
-		// TODO create run or child method (if argument number is unreachable)
-//		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "run", "([Ljava/lang/String;)V", null, null);
+		//TODO create methode RUN with good argument numbeer
 		
 		PersistentVector globalExpression = (PersistentVector) vector.get(1);
 		
 		String operation = (String) globalExpression.get(0).toString();
 		PersistentVector vectorOrOperation = (PersistentVector) globalExpression.get(1);
 		PersistentVector secondVector = (PersistentVector) globalExpression.get(2);
-		// TODO Change submethod with mv to add ASM operations
+
+		
 		addSubPersistentVector(operation, vectorOrOperation, secondVector);
 		
 		cw.visitEnd();
@@ -79,8 +78,11 @@ public class PersistentVectorCompiler extends ClassLoader implements Opcodes{
 			
 			if(addsub.equals(":add")) {
 				System.out.print("+"+ vector3.getArgument());
+				//TODO call the java methode who generate the bit code who call the add method between current tab and reference one.
+				
 			} else if (addsub.equals(":sub")) {
 				System.out.print("-"+ vector3.getArgument());
+				//TODO call the java methode who generate the bit code who call the sub method between current tab and reference one.
 			}
 		}
 	}
@@ -88,6 +90,9 @@ public class PersistentVectorCompiler extends ClassLoader implements Opcodes{
 	private static int addVector(Vector vector1, Vector vector2) {
 		int somme = vector1.getArgument() + vector2.getArgument();
 		System.out.println("somme : ("+ somme+")");
+		
+		//TODO call the java methode who generate the bit code who call the add method
+		//TODO put the result as reference tab
 		return somme;
 		
 	}
@@ -95,6 +100,9 @@ public class PersistentVectorCompiler extends ClassLoader implements Opcodes{
 	private static int subVector(Vector vector1, Vector vector2) {
 		int soustraction = vector1.getArgument() - vector2.getArgument();
 		System.out.println("soustraction : ("+ soustraction+")");
+		
+		//TODO call the java methode who generate the bit code who call the sub method
+		//TODO put the result as reference tab
 		return soustraction;
 	}
 	
@@ -112,5 +120,13 @@ public class PersistentVectorCompiler extends ClassLoader implements Opcodes{
 
 	public static int hello(int n) {
 		return 53+n;
+	}
+	
+	public void createAddMethod(){
+		//TODO 
+	}
+	
+	public void createSubMethod(){
+		//TODO 
 	}
 }
