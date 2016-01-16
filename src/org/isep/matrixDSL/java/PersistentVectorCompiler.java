@@ -39,7 +39,7 @@ public class PersistentVectorCompiler implements Opcodes {
 		PersistentVector vectorOrOperation = (PersistentVector) globalExpression.get(1);
 		PersistentVector secondVector = (PersistentVector) globalExpression.get(2);
 		
-		ClassWriter cw = new ClassWriter(0);
+		cw = new ClassWriter(0);
 		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
 		
 		// TODO create add and sub bytecode methods
@@ -132,7 +132,6 @@ public class PersistentVectorCompiler implements Opcodes {
 		//TODO call the java methode who generate the bit code who call the add method
 		//TODO put the result as reference tab
 		return somme;
-		
 	}
 
 	private int subVector(Vector vector1, Vector vector2) {
@@ -171,11 +170,11 @@ public class PersistentVectorCompiler implements Opcodes {
 		//Build arguments string
 		String arguments = "(";
 		for (int i=0; i<paramNumber; i++) {
-			arguments += "[i";
+			arguments += "[I";
 		}
 		
 		// Close arguments sting, add V for void, nothing returned
-		arguments = ")V";
+		arguments += ")V";
 		return arguments;
 	}
 	
