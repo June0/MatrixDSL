@@ -50,7 +50,7 @@ public class PersistentVectorCompiler implements Opcodes {
 		mv.visitCode();
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitVarInsn(ALOAD, 1);
-		mv.visitMethodInsn(INVOKESTATIC, "org/isep/matrixDSL/java/asm/Addition", "add", "([I[I)V", false);
+		mv.visitMethodInsn(INVOKESTATIC, className, "add", "([I[I)V", false);
 		mv.visitInsn(RETURN);
 		mv.visitMaxs(2, 2);
 		mv.visitEnd();
