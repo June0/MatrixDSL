@@ -1,82 +1,87 @@
 package org.isep.matrixDSL.java;
 
+import org.isep.matrixDSL.java.asm.ByteToClass;
 import org.isep.matrixDSL.java.domain.Vector;
-import org.objectweb.asm.*;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import clojure.lang.PersistentVector;
 
-public class PersistentVectorCompiler implements Opcodes{
-	public static String test(PersistentVector vector) {
-		String operation;
-		
-		/*ArrayList<Integer> array = new ArrayList<Integer>();
-		array.add(1);
-		array.add(3);
-		array.add(5);
-		PersistentVector test = PersistentVector.create(array);*/
-		//System.out.print("Array ? : "+vector.toArray()+"..");
-		int cnt = vector.count();
-		//System.out.println(vector);
-		PersistentVector addsub = (PersistentVector) vector.get(1);
-		//System.out.println(addsub);
-		//System.out.println(addsub.get(0).toString());
-		
+public class PersistentVectorCompiler extends ClassLoader implements Opcodes{
+	private ClassWriter cw;
+	private FieldVisitor fv;
+	private MethodVisitor mv;
+	private AnnotationVisitor av0;
+	
+	/**
+	 * 
+	 * @param a vector like : 
+		[:S
+		 [:sub
+		  [:add
+		   [:add
+		    [:add
+		     [:vector [:vsize "3"] [:argument "2"]]
+		     [:vector [:vsize "3"] [:argument "2"]]]
+		    [:vector [:vsize "3"] [:argument "3"]]]
+		   [:vector [:vsize "3"] [:argument "4"]]]
+		  [:vector [:vsize "3"] [:argument "6"]]]]
+	 */
+	public static Class compileExpression(PersistentVector vector, String className) {
 		ClassWriter cw = new ClassWriter(0);
-		FieldVisitor fv;
-		MethodVisitor mv;
-		AnnotationVisitor av0;
-
-		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, "Addition", null, "java/lang/Object", null);
-
+		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
 		
+		// TODO create run or child method (if argument number is unreachable)
+//		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "run", "([Ljava/lang/String;)V", null, null);
 		
+		PersistentVector globalExpression = (PersistentVector) vector.get(1);
 		
-		addSubPersistentVector((String) addsub.get(0).toString(), (PersistentVector) addsub.get(1), (PersistentVector) addsub.get(2));
-
+		String operation = (String) globalExpression.get(0).toString();
+		PersistentVector vectorOrOperation = (PersistentVector) globalExpression.get(1);
+		PersistentVector secondVector = (PersistentVector) globalExpression.get(2);
+		// TODO Change submethod with mv to add ASM operations
+		addSubPersistentVector(operation, vectorOrOperation, secondVector);
 		
-		//System.out.print(cnt);
+		cw.visitEnd();
+		ByteToClass byteToClass = new ByteToClass();
+		return byteToClass.byteToClass(cw.toByteArray(), className);
+	}
+	
+	public static void test(PersistentVector vector) {
 		
-		//System.out.println("object ? : "+vector.tail.toString());
-		return "TODO";
 	}
 	
 	/**
 	 * 
-	 * @param expression first persistent vector expression
-	 * @param persistentVector expression 1 if operation
-	 * @param persistentVector2 expression 2 if operation
+	 * @param operation (add or sub)
+	 * @param a vector or operation for recursive call
+	 * @param a vector
 	 */
-	private static void addSubPersistentVector(String addsub,
-			PersistentVector persistentVector,
-			PersistentVector persistentVector2) {
-
-
-		
-		if (persistentVector.get(0).toString().equals(":vector")) {
-			Vector vector1 = new Vector(persistentVector);
-			Vector vector2 = new Vector(persistentVector2);
+	private static void addSubPersistentVector(String addsub, PersistentVector vectorOrOperation, PersistentVector vector) {
+		if (isVector(vectorOrOperation)) {
+			Vector vector1 = new Vector(vectorOrOperation);
+			Vector vector2 = new Vector(vector);
 			if(addsub.equals(":add")) {
 				addVector(vector1, vector2);
 			}
 			else if (addsub.equals(":sub")) {
 				subVector(vector1, vector2);
 			}
-		}
-		else if(persistentVector.get(0).toString().equals(":add") || persistentVector.get(0).toString().equals(":sub")) {
-			PersistentVector newPersistentVector1 = (PersistentVector) persistentVector.get(1);
-			PersistentVector newPersistentVector2 = (PersistentVector) persistentVector.get(2);
+		} else {
+			PersistentVector childVectorOrOperation = (PersistentVector) vectorOrOperation.get(1);
+			PersistentVector childVector = (PersistentVector) vectorOrOperation.get(2);
 			
-			Vector vector3 = new Vector(persistentVector2);
-			addSubPersistentVector(persistentVector.get(0).toString(), 
-					newPersistentVector1, 
-					newPersistentVector2);
+			Vector vector3 = new Vector(vector);
+			addSubPersistentVector(vectorOrOperation.get(0).toString(), childVectorOrOperation, childVector);
+			
 			if(addsub.equals(":add")) {
 				System.out.print("+"+ vector3.getArgument());
-			}
-			else if (addsub.equals(":sub")) {
+			} else if (addsub.equals(":sub")) {
 				System.out.print("-"+ vector3.getArgument());
 			}
-			
 		}
 	}
 
@@ -91,6 +96,18 @@ public class PersistentVectorCompiler implements Opcodes{
 		int soustraction = vector1.getArgument() - vector2.getArgument();
 		System.out.println("soustraction : ("+ soustraction+")");
 		return soustraction;
+	}
+	
+	/**
+	 * 
+	 * @return true if vector, false if operation
+	 */
+	private static boolean isVector(PersistentVector vectorOrOperation) {
+		if (vectorOrOperation.get(0).toString().equals(":vector")){
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public static int hello(int n) {

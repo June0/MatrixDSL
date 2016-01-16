@@ -13,10 +13,6 @@ public class ByteToClass extends ClassLoader {
 			Method method = addClass.getMethod("add", int.class, int.class);
 			System.out.print(method.invoke(null,1, 2));
 			
-			
-			
-			
-			
 		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -35,5 +31,10 @@ public class ByteToClass extends ClassLoader {
 		}
 		
 		resolveClass(addClass);
+	}
+	
+	public Class byteToClass(byte[] bytes, String className) {
+		
+		return defineClass(className, bytes, 0, bytes.length);
 	}
 }
