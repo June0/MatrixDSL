@@ -15,6 +15,9 @@ public class PersistentVectorCompiler implements Opcodes {
 	private MethodVisitor mv;
 	private AnnotationVisitor av0;
 	
+	private String className;
+	private int paramNumber;
+	
 	/**
 	 * 
 	 * @param a vector like : 
@@ -30,9 +33,10 @@ public class PersistentVectorCompiler implements Opcodes {
 		  [:vector [:vsize "3"] [:argument "6"]]]]
 	 */
 	public byte[] compileExpression(PersistentVector vector, String className) {
+		this.className = className;
 		PersistentVector globalExpression = (PersistentVector) vector.get(1);
 		
-		int paramNumber = getParamsNumber(globalExpression, 0);
+		paramNumber = getParamsNumber(globalExpression, 0);
 //		System.out.println("Param number : "+paramNumber);
 		
 		String operation = (String) globalExpression.get(0).toString();
@@ -42,22 +46,24 @@ public class PersistentVectorCompiler implements Opcodes {
 		cw = new ClassWriter(0);
 		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
 		
-		// TODO create add and sub bytecode methods
 		int vectorSize = Integer.parseInt((String) ((PersistentVector) secondVector.get(1)).get(1));
 		createAddByteCodeMethod(vectorSize);
+		createSubByteCodeMethod(vectorSize);
+		// TODO create sub bytecode methods
 		
 		String runArguments = constructStringDefiningArguments(paramNumber);
 		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "run", runArguments, null, null);
 		mv.visitCode();
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitVarInsn(ALOAD, 1);
-		mv.visitMethodInsn(INVOKESTATIC, className, "add", "([I[I)V", false);
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitInsn(ARETURN);
-		mv.visitMaxs(2, 2);
-		mv.visitEnd();
+		mv.visitIntInsn(BIPUSH, vectorSize);
+		mv.visitIntInsn(NEWARRAY, T_INT);
+		mv.visitVarInsn(ASTORE, paramNumber);
+
+		addSubPersistentVector(operation, vectorOrOperation, secondVector);
 		
-//		addSubPersistentVector(operation, vectorOrOperation, secondVector);
+		mv.visitVarInsn(ALOAD, paramNumber);
+		mv.visitInsn(ARETURN);
+		mv.visitMaxs(2, paramNumber+1);
+		mv.visitEnd();
 		
 		cw.visitEnd();
 		return cw.toByteArray();
@@ -92,6 +98,32 @@ public class PersistentVectorCompiler implements Opcodes {
 		mv.visitEnd();
 		mv = null;
 	}
+
+	private void createSubByteCodeMethod(int vectorSize) {
+		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "sub", "([I[I)V", null, null);
+		mv.visitCode();
+		
+		for (int i=0; i<paramNumber; i++) {
+			// Put i value of first array in the stack for visitInsn(IASTORE)
+			mv.visitVarInsn(ALOAD, 0);
+			mv.visitIntInsn(BIPUSH, i);
+			// Load i value of first array for the add
+			mv.visitVarInsn(ALOAD, 0);
+			mv.visitIntInsn(BIPUSH, i);
+			mv.visitInsn(IALOAD);
+			// Load i value of first array for the add
+			mv.visitVarInsn(ALOAD, 1);
+			mv.visitIntInsn(BIPUSH, i);
+			mv.visitInsn(IALOAD);
+			mv.visitInsn(ISUB);
+			mv.visitInsn(IASTORE);
+		}
+		
+		mv.visitInsn(RETURN);
+		mv.visitMaxs(5, paramNumber);
+		mv.visitEnd();
+		mv = null;
+	}
 	
 	/**
 	 * 
@@ -100,49 +132,45 @@ public class PersistentVectorCompiler implements Opcodes {
 	 * @param a vector
 	 */
 	private void addSubPersistentVector(String addsub, PersistentVector vectorOrOperation, PersistentVector vector) {
+		Vector currentVector = new Vector(vector);
 		if (isVector(vectorOrOperation)) {
-			Vector vector1 = new Vector(vectorOrOperation);
-			Vector vector2 = new Vector(vector);
+			Vector deepestVector = new Vector(vectorOrOperation);
+			
 			if(addsub.equals(":add")) {
-				addVector(vector1, vector2);
+				addVector(deepestVector);
+				addVector(currentVector);
 			}
 			else if (addsub.equals(":sub")) {
-				subVector(vector1, vector2);
+				addVector(deepestVector);
+				subVector(currentVector);
 			}
 		} else {
 			PersistentVector childVectorOrOperation = (PersistentVector) vectorOrOperation.get(1);
 			PersistentVector childVector = (PersistentVector) vectorOrOperation.get(2);
 			
-			Vector vector3 = new Vector(vector);
 			addSubPersistentVector(vectorOrOperation.get(0).toString(), childVectorOrOperation, childVector);
 			
 			if(addsub.equals(":add")) {
-				System.out.print("+"+ vector3.getArgument());
-				//TODO call the java methode who generate the bit code who call the add method between current tab and reference one.
-				
+				addVector(currentVector);
 			} else if (addsub.equals(":sub")) {
-				System.out.print("-"+ vector3.getArgument());
-				//TODO call the java methode who generate the bit code who call the sub method between current tab and reference one.
+				subVector(currentVector);
 			}
 		}
 	}
 
-	private int addVector(Vector vector1, Vector vector2) {
-		int somme = vector1.getArgument() + vector2.getArgument();
-		System.out.println("somme : ("+ somme+")");
-		
-		//TODO call the java methode who generate the bit code who call the add method
-		//TODO put the result as reference tab
-		return somme;
+	/**
+	 * @param vector to add to the reference vector
+	 */
+	private void addVector(Vector vector) {
+		mv.visitVarInsn(ALOAD, paramNumber);
+		mv.visitVarInsn(ALOAD, vector.getArgument()-1);
+		mv.visitMethodInsn(INVOKESTATIC, className, "add", "([I[I)V", false);
 	}
 
-	private int subVector(Vector vector1, Vector vector2) {
-		int soustraction = vector1.getArgument() - vector2.getArgument();
-		System.out.println("soustraction : ("+ soustraction+")");
-		
-		//TODO call the java methode who generate the bit code who call the sub method
-		//TODO put the result as reference tab
-		return soustraction;
+	private void subVector(Vector vector) {
+		mv.visitVarInsn(ALOAD, paramNumber);
+		mv.visitVarInsn(ALOAD, vector.getArgument()-1);
+		mv.visitMethodInsn(INVOKESTATIC, className, "sub", "([I[I)V", false);
 	}
 	
 	
@@ -193,13 +221,5 @@ public class PersistentVectorCompiler implements Opcodes {
 
 	public static int hello(int n) {
 		return 53+n;
-	}
-	
-	public void createAddMethod(){
-		//TODO 
-	}
-	
-	public void createSubMethod(){
-		//TODO 
 	}
 }
