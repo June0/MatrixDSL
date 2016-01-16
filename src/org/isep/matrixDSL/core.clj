@@ -15,14 +15,16 @@
 
 (def vector (vectorParser "[3,%2] + [3,%1] + [3,%3] + [3,%5] - [3,%6] + [3,%4]"))
 
-(def dslmethod (let [compiled (let [compiler (PersistentVectorCompiler.)]
-                                (.compileExpression compiler vector "DSL"))
-                     cl (clojure.lang.DynamicClassLoader.)]
-                       (.defineClass cl "DSL" compiled nil)))
+(defn compile-exp [class-name exp] 
+  (let [compiled (.compileExpression (PersistentVectorCompiler.) exp class-name)
+        cl (clojure.lang.DynamicClassLoader.)]
+         (.defineClass cl class-name compiled nil))
+  (fn [class-name] 
+    (clojure.lang.Reflector/invokeStaticMethod name "run" 
+                                               (into-array (int-array [1 2 3]) (int-array [4 5 7])))))
 
+(def dsl (compile-exp "DSL" vector))
 
-
-(fn [& args] (clojure.lang.Reflector/invokeStaticMethod name meth-name (into-array args))
 
 (PersistentVectorCompiler/test (vectorParser "[3,%2] + [3,%2] + [3,%3] + [3,%4] - [3,%10]"))
 
