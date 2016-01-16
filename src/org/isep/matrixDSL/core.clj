@@ -13,7 +13,7 @@
     vsize = #'\\d+'
     argument= <'%'>#'[0-9]+'"))
 
-(def vector (vectorParser "[3,%2] + [3,%1] + [3,%3] + [3,%5] - [3,%6] + [3,%4]"))
+(def vector (vectorParser "[3,%2] + [3,%1]"))
 
 (defn compile-exp [class-name exp] 
   (let [compiled (.compileExpression (PersistentVectorCompiler.) exp class-name)
@@ -24,6 +24,7 @@
                                                (into-array (int-array [1 2 3]) (int-array [4 5 7])))))
 
 (def dsl (compile-exp "DSL" vector))
+(type dsl)
 
 
 (PersistentVectorCompiler/test (vectorParser "[3,%2] + [3,%2] + [3,%3] + [3,%4] - [3,%10]"))
