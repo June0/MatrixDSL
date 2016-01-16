@@ -1,5 +1,6 @@
 (ns org.isep.matrixDSL.core
   (:require [instaparse.core :as insta]))
+
 (import org.isep.matrixDSL.java.PersistentVectorCompiler)
 (def vectorParser
   (insta/parser
@@ -11,7 +12,18 @@
     vector = <'['> vsize <','> argument <']'>
     vsize = #'\\d+'
     argument= <'%'>#'[0-9]+'"))
-(vectorParser "[3,%2] + [3,%2] + [3,%3] + [3,%4] - [3,%6]")
+
+(def vector (vectorParser "[3,%2] + [3,%1] + [3,%3] + [3,%5] - [3,%6] + [3,%4]"))
+
+(def dslmethod (let [compiled (let [compiler (PersistentVectorCompiler.)]
+                                (.compileExpression compiler vector "DSL"))
+                     cl (clojure.lang.DynamicClassLoader.)]
+                       (.defineClass cl "DSL" compiled nil)))
+
+
+
+(fn [& args] (clojure.lang.Reflector/invokeStaticMethod name meth-name (into-array args))
+
 (PersistentVectorCompiler/test (vectorParser "[3,%2] + [3,%2] + [3,%3] + [3,%4] - [3,%10]"))
 
 (comment

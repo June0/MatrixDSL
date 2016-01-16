@@ -1,6 +1,5 @@
 package org.isep.matrixDSL.java;
 
-import org.isep.matrixDSL.java.asm.ByteToClass;
 import org.isep.matrixDSL.java.domain.Vector;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -10,7 +9,7 @@ import org.objectweb.asm.Opcodes;
 
 import clojure.lang.PersistentVector;
 
-public class PersistentVectorCompiler extends ClassLoader implements Opcodes{
+public class PersistentVectorCompiler implements Opcodes {
 	private ClassWriter cw;
 	private FieldVisitor fv;
 	private MethodVisitor mv;
@@ -30,27 +29,66 @@ public class PersistentVectorCompiler extends ClassLoader implements Opcodes{
 		   [:vector [:vsize "3"] [:argument "4"]]]
 		  [:vector [:vsize "3"] [:argument "6"]]]]
 	 */
-	public static Class compileExpression(PersistentVector vector, String className) {
-		ClassWriter cw = new ClassWriter(0);
-		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
-		//TODO create methode RUN with good argument numbeer
-		
+	public byte[] compileExpression(PersistentVector vector, String className) {
 		PersistentVector globalExpression = (PersistentVector) vector.get(1);
+		
+		int paramNumber = getParamsNumber(globalExpression, 0);
+//		System.out.println("Param number : "+paramNumber);
 		
 		String operation = (String) globalExpression.get(0).toString();
 		PersistentVector vectorOrOperation = (PersistentVector) globalExpression.get(1);
 		PersistentVector secondVector = (PersistentVector) globalExpression.get(2);
-
 		
-		addSubPersistentVector(operation, vectorOrOperation, secondVector);
+		ClassWriter cw = new ClassWriter(0);
+		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
+		
+		// TODO create add and sub bytecode methods
+		createAddByteCodeMethod(paramNumber);
+		
+		String runArguments = constructStringDefiningArguments(paramNumber);
+		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "run", runArguments, null, null);
+		mv.visitCode();
+		mv.visitVarInsn(ALOAD, 0);
+		mv.visitVarInsn(ALOAD, 1);
+		mv.visitMethodInsn(INVOKESTATIC, "org/isep/matrixDSL/java/asm/Addition", "add", "([I[I)V", false);
+		mv.visitInsn(RETURN);
+		mv.visitMaxs(2, 2);
+		mv.visitEnd();
+		
+//		addSubPersistentVector(operation, vectorOrOperation, secondVector);
 		
 		cw.visitEnd();
-		ByteToClass byteToClass = new ByteToClass();
-		return byteToClass.byteToClass(cw.toByteArray(), className);
+		return cw.toByteArray();
 	}
-	
-	public static void test(PersistentVector vector) {
+
+	/**
+	 * Create an add bytecode method from cw 
+	 * which compute two array of size paramNumber in the first one
+	 */
+	private void createAddByteCodeMethod(int paramNumber) {
+		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "add", "([I[I)V", null, null);
+		mv.visitCode();
 		
+		for (int i=0; i<paramNumber; i++) {
+			// Put i value of first array in the stack for visitInsn(IALOAD)
+			mv.visitVarInsn(ALOAD, 0);
+			mv.visitIntInsn(BIPUSH, i);
+			// Load i value of first array for the add
+			mv.visitVarInsn(ALOAD, 0);
+			mv.visitIntInsn(BIPUSH, i);
+			mv.visitInsn(IALOAD);
+			// Load i value of first array for the add
+			mv.visitVarInsn(ALOAD, 1);
+			mv.visitIntInsn(BIPUSH, i);
+			mv.visitInsn(IALOAD);
+			mv.visitInsn(IADD);
+			mv.visitInsn(IASTORE);
+		}
+		
+		mv.visitInsn(RETURN);
+		mv.visitMaxs(5, 2);
+		mv.visitEnd();
+		mv = null;
 	}
 	
 	/**
@@ -59,7 +97,7 @@ public class PersistentVectorCompiler extends ClassLoader implements Opcodes{
 	 * @param a vector or operation for recursive call
 	 * @param a vector
 	 */
-	private static void addSubPersistentVector(String addsub, PersistentVector vectorOrOperation, PersistentVector vector) {
+	private void addSubPersistentVector(String addsub, PersistentVector vectorOrOperation, PersistentVector vector) {
 		if (isVector(vectorOrOperation)) {
 			Vector vector1 = new Vector(vectorOrOperation);
 			Vector vector2 = new Vector(vector);
@@ -87,7 +125,7 @@ public class PersistentVectorCompiler extends ClassLoader implements Opcodes{
 		}
 	}
 
-	private static int addVector(Vector vector1, Vector vector2) {
+	private int addVector(Vector vector1, Vector vector2) {
 		int somme = vector1.getArgument() + vector2.getArgument();
 		System.out.println("somme : ("+ somme+")");
 		
@@ -97,7 +135,7 @@ public class PersistentVectorCompiler extends ClassLoader implements Opcodes{
 		
 	}
 
-	private static int subVector(Vector vector1, Vector vector2) {
+	private int subVector(Vector vector1, Vector vector2) {
 		int soustraction = vector1.getArgument() - vector2.getArgument();
 		System.out.println("soustraction : ("+ soustraction+")");
 		
@@ -106,8 +144,42 @@ public class PersistentVectorCompiler extends ClassLoader implements Opcodes{
 		return soustraction;
 	}
 	
+	
 	/**
-	 * 
+	 * Read recursively an expression and retrieve the param number for run method
+	 */
+	private static int getParamsNumber(PersistentVector expression, int knownParamsNumber) {
+		if (isVector(expression)) {
+			Vector vector = new Vector(expression);
+			if(vector.getArgument() > knownParamsNumber) {
+				knownParamsNumber = vector.getArgument();
+			}
+		} else {
+			Vector vector = new Vector((PersistentVector) expression.get(2));
+			if(vector.getArgument() > knownParamsNumber) {
+				knownParamsNumber = vector.getArgument();
+			}
+			knownParamsNumber = getParamsNumber((PersistentVector) expression.get(1), knownParamsNumber);
+		}
+		return knownParamsNumber;
+	}
+	
+	/**
+	 * Return a string defining array arguments for ASM, like ([i[i)V
+	 */
+	private static String constructStringDefiningArguments(int paramNumber) {
+		//Build arguments string
+		String arguments = "(";
+		for (int i=0; i<paramNumber; i++) {
+			arguments += "[i";
+		}
+		
+		// Close arguments sting, add V for void, nothing returned
+		arguments = ")V";
+		return arguments;
+	}
+	
+	/**
 	 * @return true if vector, false if operation
 	 */
 	private static boolean isVector(PersistentVector vectorOrOperation) {

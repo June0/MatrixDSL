@@ -5,6 +5,7 @@ import clojure.lang.PersistentVector;
 public class Vector {
 	private int size;
 	private int argument;
+	
 	public Vector(PersistentVector vector){
 		PersistentVector size_info = (PersistentVector) vector.get(1);
 		this.size = Integer.parseInt(size_info.get(1).toString());
@@ -13,8 +14,6 @@ public class Vector {
 		this.argument = Integer.parseInt(argument_info.get(1).toString());
 	}
 	
-	
-	
 	public int getSize() {
 		return this.size;
 	}
@@ -22,5 +21,4 @@ public class Vector {
 	public int getArgument() {
 		return this.argument;
 	}
-	
 }
