@@ -13,7 +13,7 @@
     vsize = #'\\d+'
     argument= <'%'>#'[0-9]+'"))
 
-(def vector-exp (vectorParser "[3,%2] + [3,%1]"))
+(def vector-exp (vectorParser "[10,%2] + [10,%1]"))
 (defn compile-exp [class-name exp] 
   (let [compiled (.compileExpression (PersistentVectorCompiler.) exp class-name)
         cl (clojure.lang.DynamicClassLoader.)]
@@ -23,7 +23,7 @@
 
 (def dsl (compile-exp "matrix-dsl" vector-exp))
 
-(dsl (int-array [1 2 3]) (int-array [4 5 7]))
+(dsl (int-array [1 2 3 4 5 4 5 7 9 5]) (int-array [4 5 7 9 5 1 2 3 4 5]))
 
 
 (comment

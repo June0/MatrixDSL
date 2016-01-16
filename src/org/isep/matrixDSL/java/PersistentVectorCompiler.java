@@ -43,7 +43,8 @@ public class PersistentVectorCompiler implements Opcodes {
 		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
 		
 		// TODO create add and sub bytecode methods
-		createAddByteCodeMethod(paramNumber);
+		int vectorSize = Integer.parseInt((String) ((PersistentVector) secondVector.get(1)).get(1));
+		createAddByteCodeMethod(vectorSize);
 		
 		String runArguments = constructStringDefiningArguments(paramNumber);
 		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "run", runArguments, null, null);
@@ -51,7 +52,8 @@ public class PersistentVectorCompiler implements Opcodes {
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitVarInsn(ALOAD, 1);
 		mv.visitMethodInsn(INVOKESTATIC, className, "add", "([I[I)V", false);
-		mv.visitInsn(RETURN);
+		mv.visitVarInsn(ALOAD, 0);
+		mv.visitInsn(ARETURN);
 		mv.visitMaxs(2, 2);
 		mv.visitEnd();
 		
@@ -70,7 +72,7 @@ public class PersistentVectorCompiler implements Opcodes {
 		mv.visitCode();
 		
 		for (int i=0; i<paramNumber; i++) {
-			// Put i value of first array in the stack for visitInsn(IALOAD)
+			// Put i value of first array in the stack for visitInsn(IASTORE)
 			mv.visitVarInsn(ALOAD, 0);
 			mv.visitIntInsn(BIPUSH, i);
 			// Load i value of first array for the add
@@ -86,7 +88,7 @@ public class PersistentVectorCompiler implements Opcodes {
 		}
 		
 		mv.visitInsn(RETURN);
-		mv.visitMaxs(5, 2);
+		mv.visitMaxs(5, paramNumber);
 		mv.visitEnd();
 		mv = null;
 	}
@@ -174,7 +176,7 @@ public class PersistentVectorCompiler implements Opcodes {
 		}
 		
 		// Close arguments sting, add V for void, nothing returned
-		arguments += ")V";
+		arguments += ")[I";
 		return arguments;
 	}
 	
