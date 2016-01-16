@@ -14,24 +14,17 @@
     argument= <'%'>#'[0-9]+'"))
 
 (def vector-exp (vectorParser "[3,%2] + [3,%1]"))
-
 (defn compile-exp [class-name exp] 
   (let [compiled (.compileExpression (PersistentVectorCompiler.) exp class-name)
         cl (clojure.lang.DynamicClassLoader.)]
          (.defineClass cl class-name compiled nil))
-  (fn [class-name] 
-    (clojure.lang.Reflector/invokeStaticMethod class-name "run" (into-array (int-array [1 2 3]) (int-array [4 5 7])))))
+  (fn [& args] 
+    (clojure.lang.Reflector/invokeStaticMethod class-name "run" (into-array args))))
 
 (def dsl (compile-exp "matrix-dsl" vector-exp))
-(dsl "matrix-dsl")
 
 (dsl (int-array [1 2 3]) (int-array [4 5 7]))
 
-
-
-
-
-(PersistentVectorCompiler/test (vectorParser "[3,%2] + [3,%2] + [3,%3] + [3,%4] - [3,%10]"))
 
 (comment
 	(def vector-arith
