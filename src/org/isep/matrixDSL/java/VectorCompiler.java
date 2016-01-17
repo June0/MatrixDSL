@@ -1,19 +1,15 @@
 package org.isep.matrixDSL.java;
 
 import org.isep.matrixDSL.java.domain.Vector;
-import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 import clojure.lang.PersistentVector;
 
-public class PersistentVectorCompiler implements Opcodes {
+public class VectorCompiler implements Opcodes {
 	private ClassWriter cw;
-	private FieldVisitor fv;
 	private MethodVisitor mv;
-	private AnnotationVisitor av0;
 	
 	private String className;
 	private int paramNumber;
@@ -37,7 +33,6 @@ public class PersistentVectorCompiler implements Opcodes {
 		PersistentVector globalExpression = (PersistentVector) vector.get(1);
 		
 		paramNumber = getParamsNumber(globalExpression, 0);
-//		System.out.println("Param number : "+paramNumber);
 		
 		String operation = (String) globalExpression.get(0).toString();
 		PersistentVector vectorOrOperation = (PersistentVector) globalExpression.get(1);
