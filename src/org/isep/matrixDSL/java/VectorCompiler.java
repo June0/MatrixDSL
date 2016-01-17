@@ -12,6 +12,10 @@ public class VectorCompiler implements Opcodes {
 	private MethodVisitor mv;
 	
 	private String className;
+	/**
+	 * The number of parameters which attempt the run method generate.
+	 * Used also as the created vector that is the result of the computation.
+	 */
 	private int paramNumber;
 	
 	/**
@@ -44,7 +48,6 @@ public class VectorCompiler implements Opcodes {
 		int vectorSize = Integer.parseInt((String) ((PersistentVector) secondVector.get(1)).get(1));
 		createAddByteCodeMethod(vectorSize);
 		createSubByteCodeMethod(vectorSize);
-		// TODO create sub bytecode methods
 		
 		String runArguments = constructStringDefiningArguments(paramNumber);
 		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "run", runArguments, null, null);
@@ -66,13 +69,13 @@ public class VectorCompiler implements Opcodes {
 
 	/**
 	 * Create an add bytecode method from cw 
-	 * which compute two array of size paramNumber in the first one
+	 * which compute two array of size vectorSize in the first one
 	 */
-	private void createAddByteCodeMethod(int paramNumber) {
+	private void createAddByteCodeMethod(int vectorSize) {
 		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "add", "([I[I)V", null, null);
 		mv.visitCode();
 		
-		for (int i=0; i<paramNumber; i++) {
+		for (int i=0; i<vectorSize; i++) {
 			// Put i value of first array in the stack for visitInsn(IASTORE)
 			mv.visitVarInsn(ALOAD, 0);
 			mv.visitIntInsn(BIPUSH, i);
@@ -89,7 +92,7 @@ public class VectorCompiler implements Opcodes {
 		}
 		
 		mv.visitInsn(RETURN);
-		mv.visitMaxs(5, paramNumber);
+		mv.visitMaxs(5, 2);
 		mv.visitEnd();
 		mv = null;
 	}
@@ -98,7 +101,7 @@ public class VectorCompiler implements Opcodes {
 		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "sub", "([I[I)V", null, null);
 		mv.visitCode();
 		
-		for (int i=0; i<paramNumber; i++) {
+		for (int i=0; i<vectorSize; i++) {
 			// Put i value of first array in the stack for visitInsn(IASTORE)
 			mv.visitVarInsn(ALOAD, 0);
 			mv.visitIntInsn(BIPUSH, i);
@@ -115,7 +118,7 @@ public class VectorCompiler implements Opcodes {
 		}
 		
 		mv.visitInsn(RETURN);
-		mv.visitMaxs(5, paramNumber);
+		mv.visitMaxs(5, 2);
 		mv.visitEnd();
 		mv = null;
 	}
@@ -189,7 +192,7 @@ public class VectorCompiler implements Opcodes {
 	}
 	
 	/**
-	 * Return a string defining array arguments for ASM, like ([i[i)V
+	 * Return a string defining array arguments for ASM, like ([I[I)[I
 	 */
 	private static String constructStringDefiningArguments(int paramNumber) {
 		//Build arguments string
@@ -198,7 +201,7 @@ public class VectorCompiler implements Opcodes {
 			arguments += "[I";
 		}
 		
-		// Close arguments sting, add V for void, nothing returned
+		// Close arguments string
 		arguments += ")[I";
 		return arguments;
 	}

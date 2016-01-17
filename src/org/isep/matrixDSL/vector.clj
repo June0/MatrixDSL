@@ -13,7 +13,7 @@
     vsize = #'\\d+'
     argument= <'%'>#'[0-9]+'"))
 
-(def vector-exp (vectorParser "[4,%2] - [4,%1] - [4,%3] + [4,%2]"))
+(def vector-exp (vectorParser "[6,%2] - [6,%1] - [6,%3] + [6,%2]"))
 (print vector-exp)
 (defn compile-exp [class-name exp] 
   (let [compiled (.compileExpression (VectorCompiler.) exp class-name)
@@ -24,4 +24,4 @@
 
 (def dsl (compile-exp "matrix-dsl" vector-exp))
 
-(dsl (int-array [1 2 3 4]) (int-array [4 5 7 2]) (int-array [4 5 7 9]))
+(dsl (int-array [1 2 3 4 5 7]) (int-array [4 5 7 2 7 9]) (int-array [4 5 7 9 1 2]))
