@@ -14,7 +14,7 @@
     height = #'\\d+'
     argument= <'%'>#'[0-9]+'"))
 
-(def matrix-exp (matrixParser "[2,3,%2] + [2,3,%1] + [2,3,%3] + [2,3,%1]"))
+(def matrix-exp (matrixParser "[2,3,%2] + [2,3,%1] - [2,3,%3] + [2,3,%1]"))
 ;;(print matrix-exp)
 
 (defn compile-exp [class-name exp] 

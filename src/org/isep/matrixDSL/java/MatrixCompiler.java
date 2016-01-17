@@ -39,7 +39,7 @@ public class MatrixCompiler implements Opcodes {
 		int matrixWidth = Integer.parseInt((String) ((PersistentVector) secondMatrix.get(1)).get(1));
 		int matrixHeight = Integer.parseInt((String) ((PersistentVector) secondMatrix.get(2)).get(1));
 		createAddByteCodeMethod(matrixWidth, matrixHeight);
-//		createSubByteCodeMethod(matrixWidth, matrixHeight);
+		createSubByteCodeMethod(matrixWidth, matrixHeight);
 		
 		String runArguments = constructStringDefiningArguments(paramNumber);
 		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "run", runArguments, null, null);
@@ -102,7 +102,38 @@ public class MatrixCompiler implements Opcodes {
 	}
 
 	private void createSubByteCodeMethod(int width, int height) {
-		//TODO
+		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "sub", "([[I[[I)V", null, null);
+		mv.visitCode();
+		
+		for (int i=0; i<width; i++) {
+			for (int j=0; j<height; j++) {
+				// Put i-j value of first matrix in the stack for visitInsn(IASTORE)
+				mv.visitVarInsn(ALOAD, 0);
+				mv.visitIntInsn(BIPUSH, i);
+				mv.visitInsn(AALOAD);
+				mv.visitIntInsn(BIPUSH, j);
+				// Load i-j value of first matrix for the add
+				mv.visitVarInsn(ALOAD, 0);
+				mv.visitIntInsn(BIPUSH, i);
+				mv.visitInsn(AALOAD);
+				mv.visitIntInsn(BIPUSH, j);
+				mv.visitInsn(IALOAD);
+				// Load i-j value of second matrix for the add
+				mv.visitVarInsn(ALOAD, 1);
+				mv.visitIntInsn(BIPUSH, i);
+				mv.visitInsn(AALOAD);
+				mv.visitIntInsn(BIPUSH, j);
+				mv.visitInsn(IALOAD);
+				// Compute
+				mv.visitInsn(ISUB);
+				mv.visitInsn(IASTORE);
+			}
+		}
+		
+		mv.visitInsn(RETURN);
+		mv.visitMaxs(5, 2);
+		mv.visitEnd();
+		mv = null;
 	}
 	
 	/**
@@ -148,9 +179,10 @@ public class MatrixCompiler implements Opcodes {
 	}
 
 	private void subMatrix(Matrix matrix) {
-		//TODO
+		mv.visitVarInsn(ALOAD, paramNumber);
+		mv.visitVarInsn(ALOAD, matrix.getArgument()-1);
+		mv.visitMethodInsn(INVOKESTATIC, className, "sub", "([[I[[I)V", false);
 	}
-	
 	
 	/**
 	 * Read recursively an expression and retrieve the param number for run method
