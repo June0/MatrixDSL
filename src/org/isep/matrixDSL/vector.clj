@@ -2,7 +2,7 @@
   (:require [instaparse.core :as insta]))
 
 (import org.isep.matrixDSL.java.VectorCompiler)
-(def vectorParser
+(def vector-parser
   (insta/parser
    "S = addsub space (addsub)*
     <addsub> = add | sub | vector
@@ -13,7 +13,7 @@
     vsize = #'\\d+'
     argument= <'%'>#'[0-9]+'"))
 
-(def vector-exp (vectorParser "[6,%2] - [6,%1] - [6,%3] + [6,%2]"))
+(def vector-exp (vector-parser "[6,%2] - [6,%1] - [6,%3] + [6,%2]"))
 (print vector-exp)
 
 (defn compile-exp [class-name exp] 

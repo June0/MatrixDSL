@@ -2,7 +2,7 @@
   (:require [instaparse.core :as insta]))
 
 (import org.isep.matrixDSL.java.MatrixCompiler)
-(def matrixParser
+(def matrix-parser
   (insta/parser
    "S = addsub space (addsub)*
     <addsub> = add | sub | matrix
@@ -14,8 +14,8 @@
     height = #'\\d+'
     argument= <'%'>#'[0-9]+'"))
 
-(def matrix-exp (matrixParser "[2,3,%2] + [2,3,%1] - [2,3,%3] + [2,3,%1]"))
-;;(print matrix-exp)
+(def matrix-exp (matrix-parser "[2,3,%2] + [2,3,%1] - [2,3,%3] + [2,3,%1]"))
+(print matrix-exp)
 
 (defn compile-exp [class-name exp] 
   (let [compiled (.compileExpression (MatrixCompiler.) exp class-name)
