@@ -1,7 +1,7 @@
 (ns org.isep.matrixDSL.matrix
   (:require [instaparse.core :as insta]))
 
-(import org.isep.matrixDSL.java.PersistentVectorCompiler)
+(import org.isep.matrixDSL.java.MatrixCompiler)
 (def matrixParser
   (insta/parser
    "S = addsub space (addsub)*
@@ -14,11 +14,11 @@
     height = #'\\d+'
     argument= <'%'>#'[0-9]+'"))
 
-(def matrix-exp (matrixParser "[2,3,%2] + [2,3,%1]"))
-(print matrix-exp)
+(def matrix-exp (matrixParser "[2,3,%2] + [2,3,%1] + [2,3,%3] + [2,3,%1]"))
+;;(print matrix-exp)
 
 (defn compile-exp [class-name exp] 
-  (let [compiled (.compileExpression (PersistentVectorCompiler.) exp class-name)
+  (let [compiled (.compileExpression (MatrixCompiler.) exp class-name)
         cl (clojure.lang.DynamicClassLoader.)]
          (.defineClass cl class-name compiled nil))
   (fn [& args] 
@@ -34,5 +34,5 @@
 ;; (2 4)
 (eval (create-matrix [1 2] [3 4]))
 
-(dsl (create-matrix [1 2] [3 4]) (create-matrix [3 4] [6 7]))
+(dsl (create-matrix [1 2 3 ] [3 4 5]) (create-matrix [3 4 5] [6 7 8]) (create-matrix [3 4 5] [6 7 8]))
 

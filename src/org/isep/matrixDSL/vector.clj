@@ -15,6 +15,7 @@
 
 (def vector-exp (vectorParser "[6,%2] - [6,%1] - [6,%3] + [6,%2]"))
 (print vector-exp)
+
 (defn compile-exp [class-name exp] 
   (let [compiled (.compileExpression (VectorCompiler.) exp class-name)
         cl (clojure.lang.DynamicClassLoader.)]

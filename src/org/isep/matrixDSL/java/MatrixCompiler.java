@@ -39,19 +39,20 @@ public class MatrixCompiler implements Opcodes {
 		int matrixWidth = Integer.parseInt((String) ((PersistentVector) secondMatrix.get(1)).get(1));
 		int matrixHeight = Integer.parseInt((String) ((PersistentVector) secondMatrix.get(2)).get(1));
 		createAddByteCodeMethod(matrixWidth, matrixHeight);
-		createSubByteCodeMethod(matrixWidth, matrixHeight);
+//		createSubByteCodeMethod(matrixWidth, matrixHeight);
 		
 		String runArguments = constructStringDefiningArguments(paramNumber);
 		mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "run", runArguments, null, null);
 		mv.visitCode();
-		// TODO
+		// Create matrix which store the result
 		mv.visitIntInsn(BIPUSH, matrixWidth);
-		mv.visitIntInsn(NEWARRAY, T_INT);
+		mv.visitIntInsn(BIPUSH, matrixHeight);
+		mv.visitMultiANewArrayInsn("[[I", 2);
 		mv.visitVarInsn(ASTORE, paramNumber);
 
 		addSubPersistentVector(operation, matrixOrOperation, secondMatrix);
 		
-		// TODO
+		// Return the result matrix
 		mv.visitVarInsn(ALOAD, paramNumber);
 		mv.visitInsn(ARETURN);
 		mv.visitMaxs(2, paramNumber+1);
@@ -101,7 +102,7 @@ public class MatrixCompiler implements Opcodes {
 	}
 
 	private void createSubByteCodeMethod(int width, int height) {
-		
+		//TODO
 	}
 	
 	/**
@@ -143,7 +144,7 @@ public class MatrixCompiler implements Opcodes {
 	private void addMatrix(Matrix matrix) {
 		mv.visitVarInsn(ALOAD, paramNumber);
 		mv.visitVarInsn(ALOAD, matrix.getArgument()-1);
-		mv.visitMethodInsn(INVOKESTATIC, className, "add", "([I[I)V", false);
+		mv.visitMethodInsn(INVOKESTATIC, className, "add", "([[I[[I)V", false);
 	}
 
 	private void subMatrix(Matrix matrix) {
