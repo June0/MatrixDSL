@@ -216,8 +216,4 @@ public class VectorCompiler implements Opcodes {
 			return false;
 		}
 	}
-
-	public static int hello(int n) {
-		return 53+n;
-	}
 }
